@@ -54,7 +54,7 @@ const server = http.createServer((req, res) => {
     // GET /dogs
     if (req.method === 'GET' && req.url === '/dogs') {
       // Your code here
-
+      res.write(JSON.stringify(dogs));
       return res.end();
     }
 
@@ -64,6 +64,9 @@ const server = http.createServer((req, res) => {
       if (urlParts.length === 3) {
         const dogId = urlParts[2];
         // Your code here
+        let dog = dogs.find(dog => String(dog.dogId) === dogId);
+        if (dog) res.write(JSON.stringify(dog));
+        else res.write("Dog Not Found");
       }
       return res.end();
     }
@@ -72,15 +75,25 @@ const server = http.createServer((req, res) => {
     if (req.method === 'POST' && req.url === '/dogs') {
       const { name, age } = req.body;
       // Your code here
+      dogs.push({
+        dogId: getNewDogId(),
+        name: name,
+        age: age
+      });
+      res.write(JSON.stringify(dogs[dogs.length - 1]));
       return res.end();
     }
 
     // PUT or PATCH /dogs/:dogId
     if ((req.method === 'PUT' || req.method === 'PATCH')  && req.url.startsWith('/dogs/')) {
       const urlParts = req.url.split('/');
+      const { name, age } = req.body;
       if (urlParts.length === 3) {
         const dogId = urlParts[2];
         // Your code here
+        const dog = dogs.find(dog => String(dog.dogId) === dogId);
+        [dog.name, dog.age ] = [name, age];
+        return res.end(JSON.stringify(dog));
       }
       return res.end();
     }
@@ -91,6 +104,9 @@ const server = http.createServer((req, res) => {
       if (urlParts.length === 3) {
         const dogId = urlParts[2];
         // Your code here
+        const dogIndex = dogs.findIndex(dog => String(dog.dogId) === dogId);
+        dogs.splice(dogIndex,1);
+        return res.end(JSON.stringify("Successfully deleted"));
       }
       return res.end();
     }
